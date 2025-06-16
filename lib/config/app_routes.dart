@@ -5,7 +5,6 @@ class AppRoutes {
   static const String profile = '/profile'; // This will now be the general profile page
   static const String pointMarket = '/pointMarket'; // New route for PointMarketScreen
   static const String map = '/map';
-  static const String dashboard = '/dashboard';
   static const String login = '/login';
   static const String register = '/register';
   static const String complaint = '/complaint';

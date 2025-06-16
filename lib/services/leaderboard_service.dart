@@ -3,46 +3,116 @@ import 'package:moelung_new/models/user_model.dart';
 import 'package:moelung_new/models/enums/region.dart';
 import 'package:moelung_new/models/event_model.dart';
 
+import 'dart:math';
+
 class LeaderboardService {
   static List<LeaderboardEntry> loadEntries({
     required UserModel currentUser,
     Region? region,
   }) {
-    // Dummy data for now
-    return [
-      LeaderboardEntry(
-        id: '1',
-        rank: 1,
-        name: 'John Doe',
-        quantity: 100,
-        avatarUrl: 'https://via.placeholder.com/150',
-        isYou: false,
-      ),
-      LeaderboardEntry(
-        id: currentUser.id,
-        rank: 2,
-        name: currentUser.name,
-        quantity: 90,
-        avatarUrl: 'https://via.placeholder.com/150',
-        isYou: true,
-      ),
-      LeaderboardEntry(
-        id: '3',
-        rank: 3,
-        name: 'Jane Smith',
-        quantity: 80,
-        avatarUrl: 'https://via.placeholder.com/150',
-        isYou: false,
-      ),
-    ];
+    final random = Random();
+    final List<LeaderboardEntry> allGeneratedEntries = [];
+
+    // Ensure currentUser has a region for testing regional leaderboard
+    final testCurrentUser = currentUser.region == null
+        ? currentUser.copyWith(region: Region.dkiJakarta) // Default to Jakarta for testing
+        : currentUser;
+
+    // Generate a larger pool of dummy users with various regions
+    final List<UserModel> dummyUsers = [];
+    for (int i = 0; i < 50; i++) {
+      // Assign some users to the testCurrentUser's region, others randomly
+      final assignedRegion = (i % 5 == 0 && testCurrentUser.region != null)
+          ? testCurrentUser.region!
+          : Region.values[random.nextInt(Region.values.length)];
+
+      dummyUsers.add(UserModel(
+        id: 'user_${i + 1}',
+        name: 'Dummy User ${i + 1}',
+        email: 'dummy${i + 1}@example.com',
+        points: 50 + random.nextInt(500), // Vary points
+        region: assignedRegion,
+      ));
+    }
+
+    // Ensure the current user (or testCurrentUser) is part of the dummy users, or add them if not
+    if (!dummyUsers.any((u) => u.id == testCurrentUser.id)) {
+      dummyUsers.add(testCurrentUser);
+    } else {
+      // Update current user's points and region if they were already in dummyUsers
+      final index = dummyUsers.indexWhere((u) => u.id == testCurrentUser.id);
+      dummyUsers[index] = testCurrentUser;
+    }
+
+    // Convert dummy users to leaderboard entries
+    for (final user in dummyUsers) {
+      allGeneratedEntries.add(
+        LeaderboardEntry(
+          id: user.id,
+          rank: 0, // Will be re-ranked later
+          name: user.name,
+          quantity: user.points,
+          avatarUrl: user.avatarUrl ?? 'https://i.pravatar.cc/150?img=${random.nextInt(50)}',
+          isYou: user.id == testCurrentUser.id,
+        ),
+      );
+    }
+
+    // Filter by region
+    List<LeaderboardEntry> filteredEntries;
+    if (region == null) {
+      // Global leaderboard (Indonesia)
+      filteredEntries = List.from(allGeneratedEntries);
+    } else {
+      // Regional leaderboard (Province)
+      filteredEntries = allGeneratedEntries
+          .where((entry) =>
+              dummyUsers.firstWhere((u) => u.id == entry.id).region == region)
+          .toList();
+    }
+
+    // Sort and re-rank
+    filteredEntries.sort((a, b) => b.quantity.compareTo(a.quantity));
+    for (int i = 0; i < filteredEntries.length; i++) {
+      filteredEntries[i].rank = i + 1;
+    }
+
+    // Ensure current user is visible, even if not in top ranks
+    if (!filteredEntries.any((entry) => entry.isYou)) {
+      final currentUserEntry = allGeneratedEntries.firstWhere((entry) => entry.isYou);
+      // If current user is not in the filtered list (e.g., wrong region), add them
+      // This logic might need refinement based on actual UI requirements (e.g., showing user's rank even if outside top N)
+      // For now, if they are not in the filtered list, we won't add them unless their region matches.
+      // The current filtering logic already handles this.
+    }
+
+    return filteredEntries;
   }
 
   static Future<EventModel> fetchLeaderboardEvent() async {
-    // Dummy data for now
+    // Calculate remaining time until a fixed future date (e.g., end of next week)
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 7)); // Start a week ago
+    final endDate = DateTime(now.year, now.month, now.day).add(const Duration(days: 7)); // End of next week
+    final duration = endDate.difference(now);
+
+    String remainingLabel;
+    if (duration.inDays > 0) {
+      remainingLabel = '${duration.inDays} days left';
+    } else if (duration.inHours > 0) {
+      remainingLabel = '${duration.inHours} hours left';
+    } else {
+      remainingLabel = 'Less than an hour left';
+    }
+
     return EventModel(
-      id: 'event_1',
-      name: 'Weekly Challenge',
-      remainingLabel: '2 days left',
+      id: 'le_minerale_challenge',
+      name: 'Le Minerale Bottle Challenge',
+      description: 'Join the Le Minerale Bottle Challenge and help us collect plastic bottles to save the environment!',
+      startDate: startDate,
+      endDate: endDate,
+      remainingLabel: remainingLabel,
+      imageUrl: 'https://picsum.photos/800/400?random=1',
     );
   }
 }

@@ -71,7 +71,7 @@ class BottomNav extends StatelessWidget {
             break;
           case 3:
             final route =
-                isPenyetoer(user.role) ? '/leaderboard' : '/dashboard';
+                isPenyetoer(user.role) ? '/leaderboard' : '/home'; // Navigate to home, which will redirect to Kolektoer dashboard
             Navigator.pushReplacementNamed(context, route, arguments: user);
             break;
           case 4:

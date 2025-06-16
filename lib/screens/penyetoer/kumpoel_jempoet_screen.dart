@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:moelung_new/models/enums/service_type.dart';
 import 'package:moelung_new/models/index.dart';
-import 'package:moelung_new/models/user_model.dart';
 import '../../widgets/common/page_header.dart';
 import '../../widgets/common/app_shell.dart';
 import '../../widgets/common/tikoem_map.dart';

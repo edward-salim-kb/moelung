@@ -3,6 +3,7 @@ import 'package:moelung_new/config/app_routes.dart';
 import 'package:moelung_new/models/user_model.dart'; // Import UserModel
 import 'package:moelung_new/utils/app_colors.dart'; // Import AppColors
 import 'package:moelung_new/widgets/common/page_header.dart'; // Import PageHeader
+import 'package:moelung_new/models/enums/user_role.dart'; // Import UserRole enum
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController(text: 'test@example.com'); // Pre-fill with dummy email
   final TextEditingController _passwordController = TextEditingController(text: 'password123'); // Pre-fill with dummy password
+  UserRole _selectedRole = UserRole.penyetoer; // Default role
 
   @override
   void dispose() {
@@ -28,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       id: 'user123',
       name: 'Test User',
       email: _emailController.text,
+      role: _selectedRole, // Use the selected role
     );
 
     // Navigate to home and pass the user model
@@ -98,6 +101,41 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16.0), // Add spacing before role selection
+                  DropdownButtonFormField<UserRole>(
+                    value: _selectedRole,
+                    decoration: InputDecoration(
+                      labelText: 'Login as',
+                      prefixIcon: const Icon(Icons.person, color: AppColors.dark),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide(color: AppColors.accent.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    items: UserRole.values.map((UserRole role) {
+                      return DropdownMenuItem<UserRole>(
+                        value: role,
+                        child: Text(role.label),
+                      );
+                    }).toList(),
+                    onChanged: (UserRole? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedRole = newValue;
+                        });
+                      }
+                    },
                   ),
                   const SizedBox(height: 24.0),
                   SizedBox(

@@ -14,7 +14,7 @@ class ComplaintScreen extends StatelessWidget {
       id: '123',
       name: 'Guest User',
       email: 'guest@example.com',
-      role: UserRole.penyetoerJempoet, // Using a valid penyetoer role
+      role: UserRole.penyetoer, // Using a valid penyetoer role
       // Add other required fields for UserModel if any
     );
 

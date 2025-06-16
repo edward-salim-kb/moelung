@@ -11,16 +11,23 @@ import 'package:moelung_new/services/leaderboard_service.dart';
 import 'package:moelung_new/utils/app_colors.dart';
 import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/widgets/common/page_header.dart';
-import 'package:moelung_new/widgets/common/switch_tab.dart';
 
 class _RegionOption {
+  final String id;
+  final String label;
   final Region? region;
-  const _RegionOption._(this.region);
 
-  static const global = _RegionOption._(null);
-  const _RegionOption(Region this.region);
+  const _RegionOption({required this.id, required this.label, this.region});
 
-  String get label => region?.label ?? 'Global';
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _RegionOption &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class LeaderboardScreen extends StatefulWidget {
@@ -42,12 +49,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   void initState() {
     super.initState();
 
-    _availableRegions =
-        widget.currentUser.region != null
-            ? [_RegionOption.global, _RegionOption(widget.currentUser.region!)]
-            : [_RegionOption.global];
+    final nationalOption = const _RegionOption(
+      id: 'national',
+      label: 'National (Indonesia)',
+      region: null,
+    );
+    final regionalOption = _RegionOption(
+      id: 'regional',
+      label: 'Regional',
+      region: widget.currentUser.region,
+    );
 
-    _selectedRegion = _RegionOption.global;
+    _availableRegions = [
+      nationalOption,
+      if (widget.currentUser.region != null) regionalOption,
+    ];
+
+    _selectedRegion = widget.currentUser.region != null
+        ? regionalOption
+        : nationalOption;
+
+    print(
+      'Available Regions: ${_availableRegions.map((e) => e.label).toList()}',
+    );
+    print('Selected Region: ${_selectedRegion.label}');
 
     _loadEntries();
     _loadLeaderboardEvent();
@@ -63,11 +88,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       currentUser: widget.currentUser,
       region: _selectedRegion.region,
     );
+    print(
+      'Loaded entries for region: ${_selectedRegion.label}, count: ${_entries.length}',
+    );
   }
 
   void _loadLeaderboardEvent() async {
     final event = await LeaderboardService.fetchLeaderboardEvent();
     setState(() => _event = event);
+    print(
+      'Loaded event: ${_event?.name}, remaining: ${_event?.remainingLabel}',
+    );
   }
 
   @override
@@ -78,23 +109,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const headerHeight = 340.0;
-
     return AppShell(
       navIndex: 3,
       user: widget.currentUser,
-      body: Column(
-        children: [
-          PageHeader(
-            title: 'Leaderboard',
-            trailing:
-                _event != null
-                    ? Row(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primary, AppColors.accent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+            PageHeader(
+              title: '${_event?.name ?? 'Leaderboard'} ${widget.currentUser.region != null ? '(${widget.currentUser.region!.label})' : ''}',
+              trailing: _event != null
+                  ? Row(
                       children: [
                         const Icon(
                           Icons.schedule,
                           size: 16,
-                          color: Colors.grey,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 4),
                         Container(
@@ -116,113 +154,187 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         ),
                       ],
                     )
-                    : const SizedBox.shrink(),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  height: headerHeight,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primary, AppColors.accent],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      if (_availableRegions.length > 1)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: SwitchTab<_RegionOption>(
-                            items: _availableRegions,
-                            selected: _selectedRegion,
-                            labelBuilder: (r) => r.label,
-                            onChanged: (r) {
-                              setState(() {
-                                _selectedRegion = r;
-                                _loadEntries();
-                              });
-                            },
-                            radius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      const SizedBox(height: 12),
-                      _eventCard(),
-                      const SizedBox(height: 12),
-                      _buildTopThree(),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: headerHeight - 20,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(24),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(0, -2),
-                        ),
-                      ],
-                    ),
-                    child: _buildRestList(),
-                  ),
-                ),
-              ],
+                  : const SizedBox.shrink(),
             ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ToggleButtons(
+                  isSelected: _availableRegions
+                      .map((option) => option == _selectedRegion)
+                      .toList(),
+                  onPressed: (int index) {
+                    setState(() {
+                      _selectedRegion = _availableRegions[index];
+                      _loadEntries();
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  selectedColor: Colors.white,
+                  color: AppColors.primary,
+                  fillColor: AppColors.accent,
+                  borderColor: AppColors.primary,
+                  selectedBorderColor: AppColors.accent,
+                  children: _availableRegions
+                      .map(
+                        (option) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(option.label),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _eventCard(),
+              const SizedBox(height: 12),
+              _buildTopThree(),
+              const SizedBox(height: 20),
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: _buildRestList(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _eventCard() {
-    final myRank =
-        _entries.firstWhere((e) => e.isYou, orElse: () => _entries.last).rank;
+    if (_event == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: Text(
+              'No active event at the moment.',
+              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final myRank = _entries
+        .firstWhere((e) => e.isYou, orElse: () => _entries.last)
+        .rank;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => _showEventDetailModal(context, _event!),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '#$myRank',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Keep it up, ${widget.currentUser.name.split(' ').first}!',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
               ),
-              child: Text(
-                '#$myRank',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              const SizedBox(height: 8),
+              Text(
+                _event!.description,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Keep it up, ${widget.currentUser.name.split(' ').first}!',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+              const SizedBox(height: 4),
+              Text(
+                '${_event!.startDateLabel} - ${_event!.endDateLabel}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showEventDetailModal(BuildContext context, EventModel event) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(event.name),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                if (event.imageUrl != null)
+                  SizedBox(
+                    height: 150,
+                    width: double.infinity,
+                    child: Hero(
+                      tag: 'event-banner-${event.id}',
+                      child: Image.network(
+                        event.imageUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                Text(event.description),
+                const SizedBox(height: 10),
+                Text('Start Date: ${event.startDateLabel}'),
+                Text('End Date: ${event.endDateLabel}'),
+                Text('Time Remaining: ${event.remainingLabel}'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -302,53 +414,57 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   Widget _buildRestList() {
     final rest = _entries.where((e) => e.rank > 3).toList();
-    return ListView.separated(
-      padding: const EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 16),
-      itemCount: rest.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (_, i) {
+    return Column(
+      children: List.generate(rest.length, (i) {
         final e = rest[i];
-        return ListTile(
-          leading: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${e.rank}',
+        return Column(
+          children: [
+            ListTile(
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${e.rank}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: e.isYou ? AppColors.primary : Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GFAvatar(
+                    radius: 16,
+                    backgroundImage: NetworkImage(e.avatarUrl),
+                  ),
+                ],
+              ),
+              title: Text(
+                e.name,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: e.isYou ? AppColors.primary : Colors.grey,
+                  fontWeight: e.isYou ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 8),
-              GFAvatar(radius: 16, backgroundImage: NetworkImage(e.avatarUrl)),
-            ],
-          ),
-          title: Text(
-            e.name,
-            style: TextStyle(
-              fontWeight: e.isYou ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-          subtitle: Text('${e.quantity} qty'),
-          trailing:
-              e.isYou
+              subtitle: Text('${e.quantity} qty'),
+              trailing: e.isYou
                   ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'You',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  )
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'You',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    )
                   : null,
+            ),
+            if (i < rest.length - 1) const Divider(height: 1),
+          ],
         );
-      },
+      }),
     );
   }
 }

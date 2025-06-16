@@ -1,6 +1,6 @@
 class LeaderboardEntry {
   final String id;
-  final int rank;
+  int rank; // Made non-final
   final String name;
   final int quantity;
   final String avatarUrl;

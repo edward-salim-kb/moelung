@@ -10,6 +10,7 @@ import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/widgets/common/page_header.dart';
 import 'package:moelung_new/widgets/common/scrollable_switch_tab.dart';
 import 'package:moelung_new/widgets/common/search_input.dart';
+import 'package:moelung_new/utils/app_colors.dart'; // Import AppColors
 
 class _CategoryOption {
   final TrashCategory? category;
@@ -223,19 +224,42 @@ class _TrashScreenState extends State<TrashScreen> {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      leading: Icon(
-        _iconForType(type),
-        size: 32,
-        color: CupertinoColors.systemGrey,
+      leading: SizedBox( // Use SizedBox to control size of leading content
+        width: 60, // Adjust width as needed
+        height: 60, // Adjust height as needed
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              'lib/assets/trash.png', // Use trash.png as background
+              width: 50,
+              height: 50,
+              fit: BoxFit.contain,
+              color: AppColors.primary.withOpacity(0.7), // Tint with primary color
+            ),
+            Icon(
+              _iconForType(type), // Overlay specific trash type icon
+              size: 28, // Smaller icon size
+              color: AppColors.background, // White color for contrast on tinted trash.png
+            ),
+          ],
+        ),
       ),
-      title: Column(
+      title: Text(
+        type.label,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600), // Make title bolder
+      ),
+      subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(type.label, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 2),
           Text(
-            '$qty item${qty > 1 ? 's' : ''} • ${meanKg.toStringAsFixed(2)} kg avg',
-            style: const TextStyle(fontSize: 13, color: Colors.black54),
+            '$qty item${qty > 1 ? 's' : ''}', // Quantity on its own line
+            style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.7)),
+          ),
+          Text(
+            '${meanKg.toStringAsFixed(2)} kg avg', // Average weight on its own line
+            style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.7)),
           ),
         ],
       ),
@@ -247,15 +271,15 @@ class _TrashScreenState extends State<TrashScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: AppColors.accent.withOpacity(0.2), // Themed background
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '+$plus',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
-                    color: Colors.green,
+                    color: AppColors.primary, // Themed text color
                   ),
                 ),
               )

@@ -92,8 +92,9 @@ class _TikoemMapState extends State<TikoemMap> {
       final uri = _buildOsrmUri(_userLocation!, tikoem.location);
       final res = await http.get(uri);
 
-      if (res.statusCode != 200)
+      if (res.statusCode != 200) {
         throw Exception('OSRM error ${res.statusCode}');
+      }
 
       final data = json.decode(res.body) as Map<String, dynamic>;
       final routes = (data['routes'] ?? []) as List<dynamic>;
@@ -177,7 +178,7 @@ class _TikoemMapState extends State<TikoemMap> {
                           height: 48,
                           child: GestureDetector(
                             onTap: () => _onTikoemTap(tikoem),
-                            child: const _RecyclePin(),
+                            child: const _RecyclePin(size: 48),
                           ),
                         ),
                       ),
@@ -259,7 +260,7 @@ class _TikoemMapState extends State<TikoemMap> {
 }
 
 class _RecyclePin extends StatelessWidget {
-  const _RecyclePin({this.size = 46});
+  const _RecyclePin({required this.size});
 
   final double size;
 

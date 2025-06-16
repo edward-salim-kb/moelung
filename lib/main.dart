@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moelung_new/config/app_routes.dart';
 import 'package:moelung_new/models/user_model.dart';
-import 'package:flutter/material.dart';
-import 'package:moelung_new/config/app_routes.dart';
-import 'package:moelung_new/models/user_model.dart';
-import 'package:moelung_new/screens/penyetoer/kumpoel_jempoet_screen.dart';
 import 'package:moelung_new/screens/penyetoer/trash_screen.dart';
 import 'package:moelung_new/screens/penyetoer/leaderboard_screen.dart';
 import 'package:moelung_new/screens/penyetoer/point_market_screen.dart';
@@ -13,12 +9,14 @@ import 'package:moelung_new/screens/auth/login_screen.dart';
 import 'package:moelung_new/screens/auth/register_screen.dart';
 import 'package:moelung_new/screens/common/home_screen.dart'; // Import HomeScreen
 import 'package:moelung_new/screens/common/complaint_screen.dart'; // Import ComplaintScreen
-import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/screens/kolektoer/dashboard_screen.dart'; // Import DashboardScreen
+import 'package:moelung_new/screens/kolektoer/kolektoer_trash_screen.dart'; // Import KolektoerTrashScreen
 import 'package:moelung_new/screens/penyetoer/education_screen.dart'; // Import EducationScreen
 import 'package:moelung_new/screens/common/profile_screen.dart'; // Import ProfileScreen
 import 'package:moelung_new/screens/common/notification_screen.dart'; // Import NotificationScreen
+import 'package:moelung_new/screens/common/article_detail_screen.dart'; // Import ArticleDetailScreen and Article model
 import 'package:moelung_new/models/enums/user_role.dart'; // Import UserRole enum
+import 'package:moelung_new/utils/role_utils.dart'; // Import RoleUtils
 
 void main() {
   runApp(const MyApp());
@@ -58,34 +56,39 @@ class MyApp extends StatelessWidget {
             screen = const RegisterScreen();
             break;
           case AppRoutes.home:
-            screen = HomeScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat)); // Pass user to HomeScreen
+            screen = HomeScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer)); // Pass user to HomeScreen
             break;
           case AppRoutes.complaint:
             screen = const ComplaintScreen();
             break;
           case AppRoutes.trash:
-            screen = TrashScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            final currentUser = (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer);
+            if (isKolektoer(currentUser.role)) {
+              screen = KolektoerTrashScreen(currentUser: currentUser);
+            } else {
+              screen = TrashScreen(currentUser: currentUser);
+            }
             break;
           case AppRoutes.leaderboard:
-            screen = LeaderboardScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            screen = LeaderboardScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer));
             break;
           case AppRoutes.profile: // Route to the new ProfileScreen
-            screen = ProfileScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            screen = ProfileScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer));
             break;
           case AppRoutes.pointMarket: // New route for PointMarketScreen
-            screen = PointMarketScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            screen = PointMarketScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer));
             break;
           case AppRoutes.map:
             screen = TikoemMap();
             break;
-          case AppRoutes.dashboard: // Add dashboard route
-            screen = DashboardScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
-            break;
           case AppRoutes.education: // Add education route
-            screen = EducationScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            screen = EducationScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer));
             break;
           case AppRoutes.notifications: // Add notifications route
-            screen = NotificationScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoerKumpoelAdat));
+            screen = NotificationScreen(currentUser: (user as UserModel?) ?? UserModel(id: 'dummy', name: 'Dummy User', email: 'dummy@example.com', role: UserRole.penyetoer));
+            break;
+          case AppRoutes.articleDetail: // Add article detail route
+            screen = ArticleDetailScreen(article: settings.arguments as Article);
             break;
           default:
             return MaterialPageRoute(builder: (context) => const Text('Error: Unknown route'));

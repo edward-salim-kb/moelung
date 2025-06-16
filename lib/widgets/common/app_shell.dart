@@ -48,7 +48,7 @@ class _AppShellState extends State<AppShell> {
         break;
       case 3:
         final route =
-            isPenyetoer(widget.user.role) ? '/leaderboard' : '/dashboard';
+            isPenyetoer(widget.user.role) ? '/leaderboard' : '/home'; // Navigate to home, which will redirect to Kolektoer dashboard
         Navigator.pushReplacementNamed(context, route, arguments: widget.user);
         break;
       case 4:
@@ -74,9 +74,9 @@ class _AppShellState extends State<AppShell> {
         backgroundColor: AppColors.accent, // Use accent green for FAB
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0), // Slightly rounded corners
-        ),
-        child: const Icon(Icons.recycling, color: AppColors.dark), // Recycling icon with dark green color
-        heroTag: 'map_fab_hero', // Add a unique heroTag
+        ), // Recycling icon with dark green color
+        heroTag: 'map_fab_hero',
+        child: const Icon(Icons.recycling, color: AppColors.dark), // Add a unique heroTag
       ),
       bottomNavigationBar: BottomNav(
         currentIndex: _currentIdx,

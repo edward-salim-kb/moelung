@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/widgets/common/page_header.dart'; // Import PageHeader
 import 'package:moelung_new/models/user_model.dart'; // Import UserModel
-import 'package:moelung_new/models/enums/user_role.dart'; // Import UserRole
-import 'package:moelung_new/screens/common/complaint_screen.dart'; // Import ComplaintScreen
+import 'package:moelung_new/screens/kolektoer/dashboard_screen.dart'; // Import KolektoerDashboardScreen
+import 'package:moelung_new/utils/role_utils.dart'; // Import RoleUtils
+import 'package:moelung_new/screens/common/article_detail_screen.dart'; // Import ArticleDetailScreen and Article model
 import 'package:moelung_new/utils/app_colors.dart'; // Import AppColors
 import 'package:moelung_new/config/app_routes.dart'; // Import AppRoutes
 
@@ -13,6 +14,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isKolektoer(currentUser.role)) {
+      return KolektoerDashboardScreen(currentUser: currentUser);
+    }
+
     return AppShell(
       navIndex: 0, // Assuming 0 is the index for home
       user: currentUser, // Use the passed currentUser
@@ -141,16 +146,22 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildArticleCard(
                     context,
-                    'The Importance of Recycling',
-                    'Discover why recycling is crucial for our planet and how you can make a difference.',
-                    'lib/assets/edu1.png', // Example image
+                    Article(
+                      title: 'The Importance of Recycling',
+                      description: 'Discover why recycling is crucial for our planet and how you can make a difference.',
+                      content: 'Recycling plays a vital role in environmental protection by reducing waste, conserving natural resources, and preventing pollution. By recycling, we can lessen the need for new raw materials, which in turn saves energy and reduces greenhouse gas emissions. It also helps in minimizing the amount of waste sent to landfills, thereby reducing land and air pollution. Every recycled item contributes to a healthier planet and a more sustainable future for generations to come. Get involved in local recycling programs and encourage others to participate!',
+                      imagePath: 'lib/assets/edu1.png', // Example image
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _buildArticleCard(
                     context,
-                    'Community Clean-up Drive',
-                    'Join our next community clean-up event and help keep our neighborhoods green.',
-                    'lib/assets/edu1.png', // Example image
+                    Article(
+                      title: 'Community Clean-up Drive',
+                      description: 'Join our next community clean-up event and help keep our neighborhoods green.',
+                      content: 'Our upcoming community clean-up drive is a fantastic opportunity to make a tangible difference in your local environment. We invite all community members to join us this Saturday at 9 AM in Central Park. Gloves, bags, and refreshments will be provided. This event is not just about cleaning; it\'s about fostering community spirit, raising environmental awareness, and working together for a cleaner, greener neighborhood. Your participation, no matter how small, can have a huge impact!',
+                      imagePath: 'lib/assets/edu1.png', // Example image
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -186,18 +197,17 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildArticleCard(
     BuildContext context,
-    String title,
-    String description,
-    String imagePath,
+    Article article, // Accept Article object
   ) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to article detail page
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Read more about "$title"')),
+          Navigator.pushNamed(
+            context,
+            AppRoutes.articleDetail,
+            arguments: article,
           );
         },
         child: Padding(
@@ -208,7 +218,7 @@ class HomeScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
-                  imagePath,
+                  article.imagePath, // Use article imagePath
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
@@ -220,7 +230,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      article.title, // Use article title
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -230,7 +240,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description,
+                      article.description, // Use article description
                       style: const TextStyle(fontSize: 13, color: Colors.grey),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,

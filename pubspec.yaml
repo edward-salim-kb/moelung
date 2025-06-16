@@ -14,12 +14,13 @@ dependencies:
   fluttertoast: ^8.2.12
   getwidget: ^6.0.0
   shared_preferences: ^2.0.0 # Add shared_preferences
-  geolocator: ^12.0.0 # Add geolocator
+  geolocator: ^14.0.1 # Add geolocator
+  fl_chart: ^0.68.0 # Add fl_chart for charting
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
