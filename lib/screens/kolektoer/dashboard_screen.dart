@@ -5,8 +5,11 @@ import 'package:moelung_new/models/user_model.dart';
 import 'package:moelung_new/models/tikoem_model.dart';
 import 'package:moelung_new/services/tikoem_service.dart';
 import 'package:moelung_new/models/enums/trash_type.dart';
+import 'dart:math'; // Import for math operations like pi
 import 'package:fl_chart/fl_chart.dart';
 import 'package:moelung_new/utils/app_colors.dart';
+import 'package:moelung_new/config/app_routes.dart';
+// Import NotificationScreen
 
 class KolektoerDashboardScreen extends StatefulWidget {
   final UserModel currentUser;
@@ -41,7 +44,11 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load Tikoem data: $e')),
+        SnackBar(
+          content: Text('Failed to load Tikoem data: $e'),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(top: 24.0, left: 16.0, right: 16.0),
+        ),
       );
     }
   }
@@ -53,7 +60,17 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
       user: widget.currentUser,
       body: Column(
         children: [
-          const PageHeader(title: 'Kolektoer Dashboard'),
+          PageHeader(
+            title: 'Dasbor Kolektoer',
+            showBackButton: false,
+            onNotificationPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.notifications,
+                arguments: widget.currentUser,
+              );
+            },
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -61,13 +78,64 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome, Kolektoer ${widget.currentUser.name}!',
+                    'Selamat datang, Kolektoer ${widget.currentUser.name}!',
                     style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.dark),
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'This dashboard provides all features for Kolektoer, Pengepoel, and Stakeholder/Supervisor roles.',
+                    'Dasbor ini menyediakan semua fitur untuk peran Kolektoer, Pengepoel, dan Pemangku Kepentingan/Supervisor.',
                     style: TextStyle(fontSize: 16, color: AppColors.secondary),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // KPI Cards Section
+                  const Text(
+                    'Ringkasan Kinerja Anda',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
+                  ),
+                  const SizedBox(height: 16),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final screenWidth = constraints.maxWidth;
+                      final itemWidth = (screenWidth - 16 * 3) / 2; // screenWidth - (spacing * (crossAxisCount + 1)) / crossAxisCount
+                      final itemHeight = 100.0; // Approximate desired height for the card content
+                      final childAspectRatio = itemWidth / itemHeight;
+
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: childAspectRatio,
+                        children: [
+                          _buildKpiCard(
+                            title: 'Jemput Hari Ini',
+                            value: '12', // Dummy value
+                            icon: Icons.motorcycle,
+                            color: AppColors.primary,
+                          ),
+                          _buildKpiCard(
+                            title: 'Berat Terkumpul',
+                            value: '150 kg', // Dummy value
+                            icon: Icons.scale,
+                            color: AppColors.accent,
+                          ),
+                          _buildKpiCard(
+                            title: 'Poin Didapat',
+                            value: '500', // Dummy value
+                            icon: Icons.star,
+                            color: AppColors.infoBlue,
+                          ),
+                          _buildKpiCard(
+                            title: 'Rating Rata-rata',
+                            value: '4.8', // Dummy value
+                            icon: Icons.star_half,
+                            color: AppColors.secondary,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 30),
 
@@ -76,7 +144,7 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                       ? const SizedBox.shrink()
                       : DropdownButtonFormField<Tikoem?>(
                           decoration: InputDecoration(
-                            labelText: 'Select Tikoem',
+                            labelText: 'Pilih Tikoem',
                             labelStyle: const TextStyle(color: AppColors.dark),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
@@ -91,7 +159,7 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                           items: [
                             const DropdownMenuItem<Tikoem?>(
                               value: null,
-                              child: Text('All Tikoems', style: TextStyle(color: AppColors.dark)),
+                              child: Text('Semua Tikoem', style: TextStyle(color: AppColors.dark)),
                             ),
                             ..._tikoems.map((tikoem) => DropdownMenuItem<Tikoem>(
                                   value: tikoem,
@@ -109,14 +177,14 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
 
                   // Tikoem Statistics Section
                   const Text(
-                    'Tikoem Statistics',
+                    'Statistik Tikoem',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
                   ),
                   const SizedBox(height: 16),
                   _isLoading
                       ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       : _tikoems.isEmpty
-                          ? const Center(child: Text('No Tikoem data available.', style: TextStyle(color: AppColors.secondary)))
+                          ? const Center(child: Text('Tidak ada data Tikoem tersedia.', style: TextStyle(color: AppColors.secondary)))
                           : _selectedTikoem != null
                               ? _buildTikoemCard(_selectedTikoem!)
                               : _buildAggregateTikoemStatistics(),
@@ -124,51 +192,64 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
 
                   // Total Trash Weight Comparison Bar Chart
                   const Text(
-                    'Total Trash Weight Comparison',
+                    'Perbandingan Total Berat Sampah',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
                   ),
                   const SizedBox(height: 16),
                   _isLoading
                       ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       : _tikoems.isEmpty
-                          ? const Center(child: Text('No Tikoem data for comparison.', style: TextStyle(color: AppColors.secondary)))
+                          ? const Center(child: Text('Tidak ada data Tikoem untuk perbandingan.', style: TextStyle(color: AppColors.secondary)))
                           : SizedBox(
                               height: 250, // Height for the bar chart
-                              child: BarChart(
-                                BarChartData(
-                                  barGroups: _buildBarChartGroups(_tikoems),
-                                  borderData: FlBorderData(
-                                    show: true,
-                                    border: Border.all(color: AppColors.dark, width: 1),
-                                  ),
-                                  titlesData: FlTitlesData(
-                                    show: true,
-                                    bottomTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        getTitlesWidget: (value, meta) {
-                                          return SideTitleWidget(
-                                            axisSide: meta.axisSide,
-                                            space: 4,
-                                            child: Text(_tikoems[value.toInt()].name, style: const TextStyle(fontSize: 10, color: AppColors.dark)),
-                                          );
-                                        },
-                                        reservedSize: 40,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: SizedBox(
+                                  width: _tikoems.length * 60.0, // Adjust width based on number of bars
+                                  child: BarChart(
+                                    BarChartData(
+                                      barGroups: _buildBarChartGroups(_tikoems),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(color: AppColors.dark, width: 1),
                                       ),
-                                    ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: 40,
-                                        getTitlesWidget: (value, meta) {
-                                          return Text('${value.toInt()}kg', style: const TextStyle(fontSize: 10, color: AppColors.dark));
-                                        },
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            getTitlesWidget: (value, meta) {
+                                              return SideTitleWidget(
+                                                axisSide: meta.axisSide,
+                                                space: 4,
+                                                child: Transform.rotate(
+                                                  angle: -pi / 4, // Rotate by -45 degrees
+                                                  child: Text(
+                                                    _tikoems[value.toInt()].name,
+                                                    style: const TextStyle(fontSize: 10, color: AppColors.dark),
+                                                    textAlign: TextAlign.right, // Align text to the right after rotation
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            reservedSize: 70, // Increased reserved size to accommodate tilted text
+                                          ),
+                                        ),
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 40,
+                                            getTitlesWidget: (value, meta) {
+                                              return Text('${value.toInt()}kg', style: const TextStyle(fontSize: 10, color: AppColors.dark));
+                                            },
+                                          ),
+                                        ),
+                                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                       ),
+                                      gridData: const FlGridData(show: false),
                                     ),
-                                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                   ),
-                                  gridData: const FlGridData(show: false),
                                 ),
                               ),
                             ),
@@ -176,7 +257,7 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
 
                   // Existing Kolektoer Features
                   const Text(
-                    'Kolektoer Operations',
+                    'Operasi Kolektoer',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
                   ),
                   const SizedBox(height: 16),
@@ -185,49 +266,15 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Navigating to Pickup Service (Dummy action)')),
-                        );
-                      },
-                      icon: const Icon(Icons.delivery_dining, color: Colors.white),
-                      label: const Text('Pickup Service', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        textStyle: const TextStyle(fontSize: 18),
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Navigating to Automatic Daily Reports (Dummy action)')),
-                        );
-                      },
-                      icon: const Icon(Icons.auto_stories, color: Colors.white),
-                      label: const Text('Automatic Daily Reports', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        textStyle: const TextStyle(fontSize: 18),
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Navigating to Escalation Reporting (Dummy action)')),
+                          const SnackBar(
+                            content: Text('Menuju Pelaporan Eskalasi (Aksi dummy)'),
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.only(top: 24.0, left: 16.0, right: 16.0),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.warning, color: Colors.white),
-                      label: const Text('Escalation Reporting', style: TextStyle(color: Colors.white)),
+                      label: const Text('Pelaporan Eskalasi', style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         textStyle: const TextStyle(fontSize: 18),
@@ -238,9 +285,8 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  
-
-                  
+                  // Add a buffer at the bottom to prevent overflow
+                  const SizedBox(height: 150), // Even further increased buffer
                 ],
               ),
             ),
@@ -249,6 +295,53 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
       ),
     );
 }
+
+  Widget _buildKpiCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Card(
+      color: color,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0), // Reduced padding
+        child: FittedBox( // Added FittedBox here
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(icon, size: 32, color: Colors.white), // Slightly smaller icon
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildTikoemCard(Tikoem tikoem) {
     return Card(
@@ -266,8 +359,8 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
             ),
             const SizedBox(height: 8),
-            Text('Total Trash Weight: ${tikoem.totalTrashWeight.toStringAsFixed(2)} kg', style: const TextStyle(color: AppColors.dark)),
-            Text('Capacity: ${tikoem.capacity.toStringAsFixed(2)} kg', style: const TextStyle(color: AppColors.dark)),
+            Text('Total Berat Sampah: ${tikoem.totalTrashWeight.toStringAsFixed(2)} kg', style: const TextStyle(color: AppColors.dark)),
+            Text('Kapasitas: ${tikoem.capacity.toStringAsFixed(2)} kg', style: const TextStyle(color: AppColors.dark)),
             const SizedBox(height: 16),
             Card(
               color: AppColors.primary.withOpacity(0.1),
@@ -283,7 +376,7 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Next Pickup:',
+                          'Jadwal Jemput Berikutnya:',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
                         ),
                         Text(
@@ -297,9 +390,9 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Last Emptied: ${tikoem.lastEmptiedDate?.toLocal().toString().split(' ')[0] ?? 'N/A'}', style: const TextStyle(color: AppColors.dark)),
+            Text('Terakhir Dikosongkan: ${tikoem.lastEmptiedDate?.toLocal().toString().split(' ')[0] ?? 'N/A'}', style: const TextStyle(color: AppColors.dark)),
             const SizedBox(height: 16),
-            const Text('Trash Breakdown:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+            const Text('Rincian Sampah:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
             const SizedBox(height: 8),
             ...tikoem.trashBreakdown.entries.map((entry) => Text(
                   '  - ${entry.key.label}: ${entry.value.toStringAsFixed(2)} kg',
@@ -345,16 +438,16 @@ class _KolektoerDashboardScreenState extends State<KolektoerDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Aggregate Tikoem Statistics',
+              'Statistik Agregat Tikoem',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
             ),
             const SizedBox(height: 8),
             Text(
-              'Total Trash Weight Across All Tikoems: ${totalWeightAllTikoems.toStringAsFixed(2)} kg',
+              'Total Berat Sampah di Semua Tikoem: ${totalWeightAllTikoems.toStringAsFixed(2)} kg',
               style: const TextStyle(fontSize: 16, color: AppColors.dark),
             ),
             const SizedBox(height: 16),
-            const Text('Overall Trash Breakdown:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
+            const Text('Rincian Sampah Keseluruhan:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.dark)),
             const SizedBox(height: 8),
             ...aggregateTrashBreakdown.entries.map((entry) => Text(
                   '  - ${entry.key.label}: ${entry.value.toStringAsFixed(2)} kg',
@@ -392,7 +485,6 @@ List<BarChartGroupData> _buildBarChartGroups(List<Tikoem> tikoems) {
           borderRadius: BorderRadius.circular(4),
         ),
       ],
-      showingTooltipIndicators: [0],
     );
   }).toList();
 }

@@ -15,18 +15,18 @@ class EducationScreen extends StatelessWidget {
       user: currentUser,
       body: Column( // Use Column to stack header and content
         children: [
-          const PageHeader(title: 'Education & Guides'), // Add the PageHeader
+          const PageHeader(title: 'Edukasi & Panduan'), // Translated
           Expanded( // Wrap the rest of the content in Expanded
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Welcome to Education & Guides, ${currentUser.name}!',
+                    'Selamat datang di Edukasi & Panduan, ${currentUser.name}!', // Translated
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Here you will find educational materials and quizzes.'),
+                  const Text('Di sini kamu bisa temukan materi edukasi dan kuis.'), // Translated
                   // TODO: Add interactive educational content and quizzes
                 ],
               ),

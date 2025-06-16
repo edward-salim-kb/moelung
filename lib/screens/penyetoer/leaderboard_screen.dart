@@ -11,6 +11,7 @@ import 'package:moelung_new/services/leaderboard_service.dart';
 import 'package:moelung_new/utils/app_colors.dart';
 import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/widgets/common/page_header.dart';
+import 'package:moelung_new/widgets/common/scrollable_switch_tab.dart';
 
 class _RegionOption {
   final String id;
@@ -51,23 +52,24 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
     final nationalOption = const _RegionOption(
       id: 'national',
-      label: 'National (Indonesia)',
+      label: 'Nasional (Indonesia)',
       region: null,
     );
-    final regionalOption = _RegionOption(
+
+    // For testing purposes, always include a regional option.
+    // TODO: Revert this to only show if widget.currentUser.region is not null.
+    final regionalOption = const _RegionOption(
       id: 'regional',
-      label: 'Regional',
-      region: widget.currentUser.region,
+      label: 'DKI Jakarta', // Hardcoded for testing
+      region: Region.dkiJakarta, // Hardcoded for testing
     );
 
     _availableRegions = [
       nationalOption,
-      if (widget.currentUser.region != null) regionalOption,
+      regionalOption, // Always include for testing
     ];
 
-    _selectedRegion = widget.currentUser.region != null
-        ? regionalOption
-        : nationalOption;
+    _selectedRegion = nationalOption; // Default to national
 
     print(
       'Available Regions: ${_availableRegions.map((e) => e.label).toList()}',
@@ -124,72 +126,72 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            PageHeader(
-              title: '${_event?.name ?? 'Leaderboard'} ${widget.currentUser.region != null ? '(${widget.currentUser.region!.label})' : ''}',
-              trailing: _event != null
-                  ? Row(
-                      children: [
-                        const Icon(
-                          Icons.schedule,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+              PageHeader(
+                title: _event?.name ?? 'Leaderboard',
+                showBackButton: false,
+                trailing: _event != null
+                    ? Row(
+                        children: [
+                          const Icon(
+                            Icons.schedule,
+                            size: 16,
+                            color: Colors.white,
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.accent,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            _event!.remainingLabel,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _event!.remainingLabel,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ToggleButtons(
-                  isSelected: _availableRegions
-                      .map((option) => option == _selectedRegion)
-                      .toList(),
-                  onPressed: (int index) {
-                    setState(() {
-                      _selectedRegion = _availableRegions[index];
-                      _loadEntries();
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  selectedColor: Colors.white,
-                  color: AppColors.primary,
-                  fillColor: AppColors.accent,
-                  borderColor: AppColors.primary,
-                  selectedBorderColor: AppColors.accent,
-                  children: _availableRegions
-                      .map(
-                        (option) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(option.label),
-                        ),
-                      )
-                      .toList(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Add a white background
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ScrollableSwitchTab<_RegionOption>(
+                    items: _availableRegions,
+                    selected: _selectedRegion,
+                    labelBuilder: (option) => option.label,
+                    onChanged: (option) {
+                      setState(() {
+                        _selectedRegion = option;
+                        _loadEntries();
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
-              _eventCard(),
-              const SizedBox(height: 12),
               _buildTopThree(),
               const SizedBox(height: 20),
+              _eventCard(), // Moved event card here
+              const SizedBox(height: 12), // Add spacing after event card
               Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -223,7 +225,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           ),
           child: const Center(
             child: Text(
-              'No active event at the moment.',
+              'Tidak ada event aktif saat ini.',
               style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
@@ -272,7 +274,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Keep it up, ${widget.currentUser.name.split(' ').first}!',
+                      'Semangat terus, ${widget.currentUser.name.split(' ').first}!',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -310,24 +312,21 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     width: double.infinity,
                     child: Hero(
                       tag: 'event-banner-${event.id}',
-                      child: Image.network(
-                        event.imageUrl!,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.network(event.imageUrl!, fit: BoxFit.cover),
                     ),
                   ),
                 const SizedBox(height: 10),
                 Text(event.description),
                 const SizedBox(height: 10),
-                Text('Start Date: ${event.startDateLabel}'),
-                Text('End Date: ${event.endDateLabel}'),
-                Text('Time Remaining: ${event.remainingLabel}'),
+                Text('Tanggal Mulai: ${event.startDateLabel}'),
+                Text('Tanggal Selesai: ${event.endDateLabel}'),
+                Text('Sisa Waktu: ${event.remainingLabel}'),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Close'),
+              child: const Text('Tutup'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -368,7 +367,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   ),
                   child: GFAvatar(
                     radius: isCenter ? 40 : 32,
-                    backgroundImage: NetworkImage(e.avatarUrl),
+                    backgroundImage: e.avatarUrl.startsWith('lib/assets/')
+                        ? AssetImage(e.avatarUrl) as ImageProvider
+                        : NetworkImage(e.avatarUrl),
                   ),
                 ),
                 Positioned(
@@ -400,7 +401,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ),
             ),
             Text(
-              '${e.quantity} qty',
+              '${e.quantity} kg',
               style: TextStyle(
                 color: Colors.white.withOpacity(.9),
                 fontSize: 12,
@@ -433,7 +434,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   const SizedBox(width: 8),
                   GFAvatar(
                     radius: 16,
-                    backgroundImage: NetworkImage(e.avatarUrl),
+                    backgroundImage: e.avatarUrl.startsWith('lib/assets/')
+                        ? AssetImage(e.avatarUrl) as ImageProvider
+                        : NetworkImage(e.avatarUrl),
                   ),
                 ],
               ),
@@ -443,7 +446,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   fontWeight: e.isYou ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-              subtitle: Text('${e.quantity} qty'),
+              subtitle: Text('${e.quantity} kg'),
               trailing: e.isYou
                   ? Container(
                       padding: const EdgeInsets.symmetric(
@@ -455,7 +458,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
-                        'You',
+                        'Kamu',
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     )

@@ -16,13 +16,26 @@ dependencies:
   shared_preferences: ^2.0.0 # Add shared_preferences
   geolocator: ^14.0.1 # Add geolocator
   fl_chart: ^0.68.0 # Add fl_chart for charting
+  google_fonts: ^6.2.1 # Add google_fonts for Rubik font
+  provider: ^6.0.0 # Add provider for state management
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: "^0.13.1" # Add flutter_launcher_icons
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "lib/assets/playstore.png"
+  remove_alpha_ios: true # Recommended for iOS icons
 
 flutter:
   uses-material-design: true
   assets:
     - lib/assets/
+    - lib/assets/trash/
+    - lib/assets/point-items/
+    - lib/assets/articles/
+    - lib/assets/avatars/

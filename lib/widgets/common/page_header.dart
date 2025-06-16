@@ -4,8 +4,16 @@ import 'package:moelung_new/utils/app_colors.dart';
 class PageHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Widget? trailing;
+  final bool showBackButton;
+  final VoidCallback? onNotificationPressed; // New parameter for notification icon
 
-  const PageHeader({super.key, required this.title, this.trailing});
+  const PageHeader({
+    super.key,
+    required this.title,
+    this.trailing,
+    this.showBackButton = true,
+    this.onNotificationPressed, // Initialize new parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +28,12 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
       child: Row(
         children: [
-          if (canGoBack)
+          if (canGoBack && showBackButton) // Conditionally show back button
             IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.background), // White icon for contrast
               onPressed: () => Navigator.pop(context),
             ),
-          if (!canGoBack) const SizedBox(width: 16),
+          if (!canGoBack || !showBackButton) const SizedBox(width: 16), // Adjust spacing if no back button
           Expanded(
             child: Text(
               title,
@@ -33,6 +41,11 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
               textAlign: TextAlign.left,
             ),
           ),
+          if (onNotificationPressed != null) // Conditionally show notification icon
+            IconButton(
+              icon: const Icon(Icons.notifications, color: AppColors.background),
+              onPressed: onNotificationPressed,
+            ),
           if (trailing != null) trailing!,
         ],
       ),

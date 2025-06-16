@@ -13,9 +13,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController(text: 'test@example.com'); // Pre-fill with dummy email
-  final TextEditingController _passwordController = TextEditingController(text: 'password123'); // Pre-fill with dummy password
-  UserRole _selectedRole = UserRole.penyetoer; // Default role
+  final TextEditingController _emailController = TextEditingController(text: 'penyetoer.budi@example.com');
+  final TextEditingController _passwordController = TextEditingController(text: 'rahasia123');
+  bool _obscureText = true;
+  UserRole _selectedRole = UserRole.penyetoer;
 
   @override
   void dispose() {
@@ -25,12 +26,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
-    // For demonstration, create a dummy user
+    // For demonstration, create a dummy user with ID matching dummy data
+    final String userId = _selectedRole == UserRole.penyetoer
+        ? 'penyetoer_id_default'
+        : 'kolektoer_id_default';
+
     final user = UserModel(
-      id: 'user123',
-      name: 'Test User',
+      id: userId,
+      name: _selectedRole == UserRole.penyetoer ? 'Budi Santoso' : 'Siti Rahayu',
       email: _emailController.text,
-      role: _selectedRole, // Use the selected role
+      role: _selectedRole,
     );
 
     // Navigate to home and pass the user model
@@ -47,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView( // Allow scrolling for smaller screens
         child: Column(
           children: [
-            const PageHeader(title: 'Login'), // Add PageHeader
+            const PageHeader(title: 'Masuk', showBackButton: false), // Translated
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -61,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: 'Email', // Kept as 'Email'
                       prefixIcon: const Icon(Icons.email, color: AppColors.dark), // Themed icon
                       filled: true,
                       fillColor: AppColors.background,
@@ -82,10 +87,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16.0),
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscureText,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Kata Sandi', // Translated
                       prefixIcon: const Icon(Icons.lock, color: AppColors.dark), // Themed icon
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText ? Icons.visibility : Icons.visibility_off,
+                          color: AppColors.dark,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
                       filled: true,
                       fillColor: AppColors.background,
                       border: OutlineInputBorder(
@@ -106,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   DropdownButtonFormField<UserRole>(
                     value: _selectedRole,
                     decoration: InputDecoration(
-                      labelText: 'Login as',
+                      labelText: 'Masuk sebagai', // Translated
                       prefixIcon: const Icon(Icons.person, color: AppColors.dark),
                       filled: true,
                       fillColor: AppColors.background,
@@ -150,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       child: const Text(
-                        'Login',
+                        'Masuk', // Translated
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
@@ -163,7 +179,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.dark, // Themed text color
                     ),
-                    child: const Text('Don\'t have an account? Register here.'),
+                    child: const Text('Belum punya akun? Daftar di sini.'), // Translated
+                  ),
+                  const SizedBox(height: 8.0), // Add some spacing
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          // Pass a dummy user for TOS/Privacy Policy screens as they require a user model
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.termsOfService,
+                            arguments: UserModel(id: 'guest', name: 'Guest', email: 'guest@example.com', role: UserRole.penyetoer),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.secondary,
+                        ),
+                        child: const Text('Ketentuan Layanan'),
+                      ),
+                      const Text(' | ', style: TextStyle(color: Colors.grey)),
+                      TextButton(
+                        onPressed: () {
+                          // Pass a dummy user for TOS/Privacy Policy screens as they require a user model
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.privacyPolicy,
+                            arguments: UserModel(id: 'guest', name: 'Guest', email: 'guest@example.com', role: UserRole.penyetoer),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.secondary,
+                        ),
+                        child: const Text('Kebijakan Privasi'),
+                      ),
+                    ],
                   ),
                 ],
               ),

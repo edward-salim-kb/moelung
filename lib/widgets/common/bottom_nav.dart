@@ -33,9 +33,9 @@ class BottomNav extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _item(context, icon: Icons.home_outlined, index: 0, tooltip: 'Home'),
-            _item(context, icon: Icons.delete_outline, index: 1, tooltip: 'Trash'),
-            const SizedBox(width: 48),
+            _item(context, icon: Icons.home_outlined, index: 0, tooltip: 'Beranda'),
+            _item(context, icon: Icons.delete_outline, index: 1, tooltip: 'Sampah'),
+            if (!isKolektoer(user.role)) const SizedBox(width: 48), // Only show SizedBox if not Kolektoer
             _item(
               context,
               icon:
@@ -43,9 +43,9 @@ class BottomNav extends StatelessWidget {
                       ? Icons.emoji_events_outlined
                       : Icons.dashboard_customize_outlined,
               index: 3,
-              tooltip: isPenyetoer(user.role) ? 'Leaderboard' : 'Dashboard',
+              tooltip: isPenyetoer(user.role) ? 'Papan Peringkat' : 'Dasbor',
             ),
-            _item(context, icon: Icons.person_outline, index: 4, tooltip: 'Profile'),
+            _item(context, icon: Icons.person_outline, index: 4, tooltip: 'Profil'),
           ],
         ),
       ),
@@ -71,7 +71,7 @@ class BottomNav extends StatelessWidget {
             break;
           case 3:
             final route =
-                isPenyetoer(user.role) ? '/leaderboard' : '/home'; // Navigate to home, which will redirect to Kolektoer dashboard
+                isPenyetoer(user.role) ? AppRoutes.leaderboard : AppRoutes.dashboard; // Navigate to dashboard for Kolektoer
             Navigator.pushReplacementNamed(context, route, arguments: user);
             break;
           case 4:
@@ -83,7 +83,7 @@ class BottomNav extends StatelessWidget {
             break;
         }
       },
-      icon: Icon(icon, color: active ? AppColors.accent : AppColors.background), // Active: accent, Inactive: background
+      icon: Icon(icon, color: active ? AppColors.dark : AppColors.background), // Active: darker green, Inactive: background
     );
   }
 }

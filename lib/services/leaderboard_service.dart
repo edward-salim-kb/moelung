@@ -13,35 +13,66 @@ class LeaderboardService {
     final random = Random();
     final List<LeaderboardEntry> allGeneratedEntries = [];
 
+    // List of diverse Indonesian avatar image paths
+    final List<String> avatarPaths = List.generate(
+      21, // From image.png to image copy 20.png
+      (index) => index == 0
+          ? 'lib/assets/avatars/image.png'
+          : 'lib/assets/avatars/image copy ${index - 1}.png',
+    );
+
     // Ensure currentUser has a region for testing regional leaderboard
     final testCurrentUser = currentUser.region == null
         ? currentUser.copyWith(region: Region.dkiJakarta) // Default to Jakarta for testing
         : currentUser;
 
     // Generate a larger pool of dummy users with various regions
+    final List<String> indonesianNames = [
+      'Budi Santoso', 'Siti Aminah', 'Joko Susilo', 'Dewi Lestari', 'Agus Salim',
+      'Rina Wijaya', 'Fajar Nugroho', 'Kartika Putri', 'Eko Prasetyo', 'Nurul Huda',
+      'Bayu Pratama', 'Indah Permata', 'Cahyo Utomo', 'Dian Kusuma', 'Gatot Subroto',
+      'Hana Rahmawati', 'Irfan Hakim', 'Lina Marlina', 'Mochamad Iqbal', 'Nia Ramadhani',
+      'Pandu Wijaya', 'Qoriatul Hasanah', 'Rizky Febian', 'Sinta Bella', 'Taufik Hidayat',
+      'Umi Kulsum', 'Vina Panduwinata', 'Wayan Sudarta', 'Yuni Shara', 'Zulkifli Hasan',
+      'Putri Ayu', 'Rudi Hartono', 'Sri Wahyuni', 'Teguh Santoso', 'Umar Bakri',
+      'Wati Indah', 'Xavier Tan', 'Yanti Susanti', 'Zahra Fadhilah', 'Andi Permana',
+      'Citra Kirana', 'Denny Cagur', 'Fitriani', 'Gilang Dirga', 'Happy Salma',
+      'Ivan Gunawan', 'Jessica Iskandar', 'Kevin Sanjaya', 'Luna Maya',
+    ];
+
+    // Shuffle names to ensure uniqueness for dummy users
+    indonesianNames.shuffle(random);
+
     final List<UserModel> dummyUsers = [];
     for (int i = 0; i < 50; i++) {
-      // Assign some users to the testCurrentUser's region, others randomly
+      final String name = indonesianNames[i % indonesianNames.length]; // Use shuffled names
+      final String email = '${name.toLowerCase().replaceAll(' ', '.')}${random.nextInt(100)}@example.com';
       final assignedRegion = (i % 5 == 0 && testCurrentUser.region != null)
           ? testCurrentUser.region!
           : Region.values[random.nextInt(Region.values.length)];
+      final String avatar = avatarPaths[random.nextInt(avatarPaths.length)];
 
       dummyUsers.add(UserModel(
         id: 'user_${i + 1}',
-        name: 'Dummy User ${i + 1}',
-        email: 'dummy${i + 1}@example.com',
+        name: name,
+        email: email,
         points: 50 + random.nextInt(500), // Vary points
         region: assignedRegion,
+        avatarUrl: avatar, // Assign a random avatar
       ));
     }
 
     // Ensure the current user (or testCurrentUser) is part of the dummy users, or add them if not
     if (!dummyUsers.any((u) => u.id == testCurrentUser.id)) {
-      dummyUsers.add(testCurrentUser);
+      dummyUsers.add(testCurrentUser.copyWith(
+        avatarUrl: testCurrentUser.avatarUrl ?? avatarPaths[random.nextInt(avatarPaths.length)],
+      ));
     } else {
-      // Update current user's points and region if they were already in dummyUsers
+      // Update current user's points, region, and avatar if they were already in dummyUsers
       final index = dummyUsers.indexWhere((u) => u.id == testCurrentUser.id);
-      dummyUsers[index] = testCurrentUser;
+      dummyUsers[index] = testCurrentUser.copyWith(
+        avatarUrl: testCurrentUser.avatarUrl ?? avatarPaths[random.nextInt(avatarPaths.length)],
+      );
     }
 
     // Convert dummy users to leaderboard entries
@@ -52,7 +83,7 @@ class LeaderboardService {
           rank: 0, // Will be re-ranked later
           name: user.name,
           quantity: user.points,
-          avatarUrl: user.avatarUrl ?? 'https://i.pravatar.cc/150?img=${random.nextInt(50)}',
+          avatarUrl: user.avatarUrl!, // Use the assigned avatar
           isYou: user.id == testCurrentUser.id,
         ),
       );
@@ -112,7 +143,7 @@ class LeaderboardService {
       startDate: startDate,
       endDate: endDate,
       remainingLabel: remainingLabel,
-      imageUrl: 'https://picsum.photos/800/400?random=1',
+      imageUrl: 'lib/assets/le-minerale-event.png',
     );
   }
 }

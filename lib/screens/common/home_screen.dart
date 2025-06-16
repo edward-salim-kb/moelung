@@ -24,7 +24,8 @@ class HomeScreen extends StatelessWidget {
       body: Column( // Use Column to stack header and content
         children: [
           PageHeader(
-            title: 'Home',
+            title: 'Beranda',
+            showBackButton: false, // Hide back button
             trailing: Row( // Use a Row for multiple trailing icons
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -75,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Hello, ${currentUser.name.split(' ').first}!',
+                                'Halo, ${currentUser.name.split(' ').first}!',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -84,14 +85,14 @@ class HomeScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Role: ${currentUser.role.toString().split('.').last}',
+                                'Peran: ${currentUser.role.toString().split('.').last}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.white.withOpacity(0.8),
                                 ),
                               ),
                               Text(
-                                'Points: ${currentUser.points}',
+                                'Poin: ${currentUser.points}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.white.withOpacity(0.8),
@@ -120,7 +121,7 @@ class HomeScreen extends StatelessWidget {
                       },
                       icon: const Icon(Icons.star, color: Colors.white),
                       label: const Text(
-                        'Go to Point Market',
+                        'Ke Pasar Poin',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -136,7 +137,7 @@ class HomeScreen extends StatelessWidget {
 
                   // Articles Section
                   Text(
-                    'Latest Articles',
+                    'Artikel Terbaru',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -147,27 +148,27 @@ class HomeScreen extends StatelessWidget {
                   _buildArticleCard(
                     context,
                     Article(
-                      title: 'The Importance of Recycling',
-                      description: 'Discover why recycling is crucial for our planet and how you can make a difference.',
-                      content: 'Recycling plays a vital role in environmental protection by reducing waste, conserving natural resources, and preventing pollution. By recycling, we can lessen the need for new raw materials, which in turn saves energy and reduces greenhouse gas emissions. It also helps in minimizing the amount of waste sent to landfills, thereby reducing land and air pollution. Every recycled item contributes to a healthier planet and a more sustainable future for generations to come. Get involved in local recycling programs and encourage others to participate!',
-                      imagePath: 'lib/assets/edu1.png', // Example image
+                      title: 'Pentingnya Daur Ulang',
+                      description: 'Cari tahu kenapa daur ulang penting banget buat bumi kita dan gimana kamu bisa bantu.',
+                      content: 'Daur ulang itu penting banget buat jaga lingkungan, biar sampah berkurang, sumber daya alam awet, dan polusi gak makin parah. Dengan daur ulang, kita bisa hemat bahan baku baru, jadi energi juga hemat dan emisi gas rumah kaca berkurang. Ini juga bantu ngurangin sampah yang dibuang ke TPA, jadi polusi tanah sama udara juga berkurang. Setiap barang yang didaur ulang itu bantu bikin bumi lebih sehat dan masa depan yang lebih lestari buat anak cucu kita. Yuk, ikutan program daur ulang di daerahmu dan ajak teman-teman juga!',
+                      imagePath: 'lib/assets/articles/pentingnya-daur-ulang.png',
                     ),
                   ),
                   const SizedBox(height: 12),
                   _buildArticleCard(
                     context,
                     Article(
-                      title: 'Community Clean-up Drive',
-                      description: 'Join our next community clean-up event and help keep our neighborhoods green.',
-                      content: 'Our upcoming community clean-up drive is a fantastic opportunity to make a tangible difference in your local environment. We invite all community members to join us this Saturday at 9 AM in Central Park. Gloves, bags, and refreshments will be provided. This event is not just about cleaning; it\'s about fostering community spirit, raising environmental awareness, and working together for a cleaner, greener neighborhood. Your participation, no matter how small, can have a huge impact!',
-                      imagePath: 'lib/assets/edu1.png', // Example image
+                      title: 'Aksi Bersih-bersih Lingkungan',
+                      description: 'Yuk, ikutan acara bersih-bersih lingkungan kita selanjutnya dan bantu jaga lingkungan sekitar tetap hijau.',
+                      content: 'Aksi bersih-bersih lingkungan kita nanti itu kesempatan bagus banget buat bikin perubahan nyata di lingkunganmu. Kita ngajak semua warga buat gabung hari Sabtu ini jam 9 pagi di Taman Pusat. Sarung tangan, kantong sampah, sama minuman bakal disediain. Acara ini bukan cuma buat bersih-bersih aja; ini juga buat bangun semangat kebersamaan, ningkatin kesadaran lingkungan, dan kerja bareng buat lingkungan yang lebih bersih dan hijau. Partisipasimu, sekecil apapun, bisa punya dampak besar!',
+                      imagePath: 'lib/assets/articles/aksi-bersih-lingkungan.png',
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // News Section
+                  // Application Announcements Section
                   Text(
-                    'Recent News',
+                    'Pengumuman Aplikasi',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -177,14 +178,14 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildNewsItem(
                     context,
-                    'New Recycling Initiative Launched in Jakarta',
-                    'A new program aims to boost recycling rates in urban areas.',
+                    'Pembaruan Aplikasi: Fitur Baru Tersedia!',
+                    'Kami telah meluncurkan fitur-fitur menarik untuk meningkatkan pengalaman Anda. Periksa sekarang!',
                   ),
                   const SizedBox(height: 8),
                   _buildNewsItem(
                     context,
-                    'Pemulung Recognized for Environmental Efforts',
-                    'Local recyclers are celebrated for their vital contribution to sustainability.',
+                    'Perbaikan Kinerja dan Bug',
+                    'Pembaruan terbaru mencakup peningkatan kinerja dan perbaikan bug untuk aplikasi yang lebih stabil.',
                   ),
                 ],
               ),

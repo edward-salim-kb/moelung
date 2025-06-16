@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.example.moelung_new"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // The ndkVersion is moved here, as per your request
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

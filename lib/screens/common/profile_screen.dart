@@ -3,6 +3,8 @@ import 'package:moelung_new/widgets/common/app_shell.dart';
 import 'package:moelung_new/widgets/common/page_header.dart'; // Import PageHeader
 import 'package:moelung_new/models/user_model.dart';
 import 'package:moelung_new/utils/app_colors.dart';
+import 'package:moelung_new/config/app_routes.dart'; // Import AppRoutes
+// Import EditProfileScreen
 
 // Dummy UserService for demonstration
 class UserService {
@@ -28,37 +30,30 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late UserModel _user;
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
 
   @override
   void initState() {
     super.initState();
     _user = widget.currentUser;
-    _nameController = TextEditingController(text: _user.name);
-    _emailController = TextEditingController(text: _user.email);
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
-  }
+  // Method to navigate to edit profile screen and update user data
+  void _navigateToEditProfile() async {
+    final updatedUser = await Navigator.of(context).pushNamed(
+      AppRoutes.editProfile,
+      arguments: _user,
+    );
 
-  void _saveProfile() async {
-    if (_formKey.currentState!.validate()) {
-      final updatedUser = await UserService.updateUser(
-        _user,
-        name: _nameController.text,
-        email: _emailController.text,
-      );
+    if (updatedUser != null && updatedUser is UserModel) {
       setState(() {
         _user = updatedUser;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
+        const SnackBar(
+          content: Text('Profil berhasil diperbarui!'), // Indonesian: Profile updated successfully
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(top: 24.0, left: 16.0, right: 16.0),
+        ),
       );
     }
   }
@@ -70,116 +65,166 @@ class _ProfileScreenState extends State<ProfileScreen> {
       user: _user, // Use the mutable _user state
       body: Column( // Use Column to stack header and content
         children: [
-          const PageHeader(title: 'Profile'), // Add the PageHeader
+          const PageHeader(title: 'Profil Saya', showBackButton: false), // Indonesian: My Profile
           Expanded( // Wrap the rest of the content in Expanded
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundImage: AssetImage('lib/assets/avatar.png'), // Placeholder for user avatar
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: AssetImage(_user.avatarUrl ?? 'lib/assets/avatar.png'), // Use user's avatar or placeholder
                       ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.person),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 30),
-                      _buildProfileInfoRow(
-                        icon: Icons.person,
-                        label: 'Role',
-                        value: _user.role.toString().split('.').last, // Display user role from mutable state
-                      ),
-                      const Divider(),
-                      _buildProfileInfoRow(
-                        icon: Icons.star,
-                        label: 'Points',
-                        value: _user.points.toString(), // Display points from mutable state
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 30),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: _saveProfile,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                    ),
+                    const SizedBox(height: 20),
+                    // Profile Info Card
+                    Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            _buildProfileInfoRow(
+                              icon: Icons.person,
+                              label: 'Nama', // Indonesian: Name
+                              value: _user.name,
                             ),
-                          ),
-                          child: const Text(
-                            'Save Profile',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implement actual logout logic (clear user session, etc.)
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              '/login', // Navigate back to the login screen
-                              (route) => false, // Remove all previous routes from the stack
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red, // Use a different color for logout
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            const Divider(),
+                            _buildProfileInfoRow(
+                              icon: Icons.email,
+                              label: 'Email',
+                              value: _user.email,
                             ),
-                          ),
-                          child: const Text(
-                            'Logout',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
+                            const Divider(),
+                            _buildProfileInfoRow(
+                              icon: Icons.badge, // Icon for role
+                              label: 'Peran', // Indonesian: Role
+                              value: _user.role.label, // Display user role label
+                            ),
+                            const Divider(),
+                            _buildProfileInfoRow(
+                              icon: Icons.star,
+                              label: 'Poin', // Indonesian: Points
+                              value: _user.points.toString(),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20), // Space between info and options cards
+
+                    // Options Card
+                    Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            _buildProfileOptionRow(
+                              icon: Icons.edit,
+                              label: 'Edit Profil',
+                              onTap: _navigateToEditProfile,
+                            ),
+                            // Removed Dividers between options, relying on padding within _buildProfileOptionRow
+                            _buildProfileOptionRow(
+                              icon: Icons.settings,
+                              label: 'Pengaturan Aksesibilitas',
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.accessibilitySettings,
+                                  arguments: _user,
+                                );
+                              },
+                            ),
+                            _buildProfileOptionRow(
+                              icon: Icons.description,
+                              label: 'Ketentuan Layanan',
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.termsOfService,
+                                  arguments: _user,
+                                );
+                              },
+                            ),
+                            _buildProfileOptionRow(
+                              icon: Icons.privacy_tip,
+                              label: 'Kebijakan Privasi',
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.privacyPolicy,
+                                  arguments: _user,
+                                );
+                              },
+                            ),
+                            _buildProfileOptionRow(
+                              icon: Icons.logout,
+                              label: 'Keluar',
+                              onTap: () {
+                                // TODO: Implement actual logout logic (clear user session, etc.)
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  AppRoutes.login,
+                                  (route) => false,
+                                );
+                              },
+                              isDestructive: true, // Apply red color for logout
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileOptionRow({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isDestructive ? AppColors.errorRed : AppColors.primary,
+              size: 28,
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: isDestructive ? AppColors.errorRed : AppColors.dark,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 18,
+              color: isDestructive ? AppColors.errorRed : Colors.grey,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -193,14 +238,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(width: 16),
           Text(
             '$label:',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.dark),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 18),
-              overflow: TextOverflow.ellipsis,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey.withOpacity(0.3), // Light background for the field
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 18, color: AppColors.dark), // Darker text for contrast
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ],

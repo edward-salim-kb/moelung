@@ -53,7 +53,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
       body: Column(
         children: [
           PageHeader(
-            title: 'Point Market',
+            title: 'Pasar Poin',
             trailing: Row(
               children: [
                 const Icon(CupertinoIcons.star_fill, color: AppColors.primary),
@@ -75,10 +75,11 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
               selected: _selectedTab,
               labelBuilder:
                   (cat) => switch (cat) {
-                    null => 'All',
+                    null => 'Semua',
                     CatalogCategory.voucher => 'Voucher',
                     CatalogCategory.merchandise => 'Merchandise',
-                    CatalogCategory.cash => 'Cash',
+                    CatalogCategory.cash => 'Tunai',
+                    CatalogCategory.donation => 'Donasi', // Add donation case
                   },
               onChanged: (cat) => setState(() => _selectedTab = cat),
             ),
@@ -98,7 +99,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
                 }
 
                 if (items.isEmpty) {
-                  return const Center(child: Text('No items available.'));
+                  return const Center(child: Text('Tidak ada item tersedia.'));
                 }
 
                 return RefreshIndicator(
@@ -168,11 +169,11 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
                     Icon(
                       CupertinoIcons.star_fill,
                       size: 14,
-                      color: canRedeem ? AppColors.primary : Colors.black38,
+                    color: canRedeem ? AppColors.primary : Colors.black38,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${item.costPoints} pts',
+                      '${item.costPoints} poin',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -181,7 +182,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Qty: ${item.quantity}',
+                      'Stok: ${item.quantity}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black54,
@@ -206,7 +207,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
                         setState(() => _user = updatedUser);
 
                         Fluttertoast.showToast(
-                          msg: "Redeemed ${item.name}!",
+                          msg: "Berhasil menukar ${item.name}!",
                           toastLength: Toast.LENGTH_SHORT,
                           gravity: ToastGravity.BOTTOM,
                           backgroundColor: Colors.green,
@@ -227,7 +228,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
                       }
                     }
                     : null,
-            text: item.quantity <= 0 ? 'Out of Stock' : 'Redeem',
+            text: item.quantity <= 0 ? 'Stok Habis' : 'Tukar',
             size: GFSize.SMALL,
             shape: GFButtonShape.pills,
             color: AppColors.primary,
@@ -241,6 +242,7 @@ class _PointMarketScreenState extends State<PointMarketScreen> {
   String _labelForCat(CatalogCategory cat) => switch (cat) {
     CatalogCategory.voucher => 'Voucher',
     CatalogCategory.merchandise => 'Merchandise',
-    CatalogCategory.cash => 'Cash',
+    CatalogCategory.cash => 'Tunai',
+    CatalogCategory.donation => 'Donasi', // Add donation case
   };
 }

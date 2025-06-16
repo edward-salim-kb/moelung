@@ -12,28 +12,80 @@ enum TrashType {
   lightBulb,
   cardboard,
   officePaper,
+  plasticBag, // Added
+  electronic, // Added
+  metal,      // Added
+  textile,    // Added
+  wood,       // Added
+  rubber,     // Added
+  other,      // Added
 }
 
 extension TrashCategoryX on TrashCategory {
   String get label => switch (this) {
-    TrashCategory.organic => 'Organic',
-    TrashCategory.inorganic => 'Inorganic',
-    TrashCategory.residual => 'Residual',
-    TrashCategory.hazardous => 'Hazardous',
-    TrashCategory.paper => 'Paper',
+    TrashCategory.organic => 'Organik',
+    TrashCategory.inorganic => 'Anorganik',
+    TrashCategory.residual => 'Residu',
+    TrashCategory.hazardous => 'Bahan Berbahaya',
+    TrashCategory.paper => 'Kertas',
   };
 
   String get description => switch (this) {
-    TrashCategory.organic => 'Food scraps, leaves – for compost.',
-    TrashCategory.inorganic => 'Plastic, cans, glass – for recycling.',
-    TrashCategory.residual => 'Diapers, sanitary pads – land‑fill.',
-    TrashCategory.hazardous => 'Batteries, bulbs – special B3 facility.',
-    TrashCategory.paper => 'Dry paper & cardboard – separate recycle.',
+    TrashCategory.organic => 'Sisa makanan, daun – untuk kompos.',
+    TrashCategory.inorganic => 'Plastik, kaleng, kaca – untuk daur ulang.',
+    TrashCategory.residual => 'Popok, pembalut – ke TPA.',
+    TrashCategory.hazardous => 'Baterai, bohlam – fasilitas B3 khusus.',
+    TrashCategory.paper => 'Kertas kering & kardus – daur ulang terpisah.',
   };
 }
 
 extension TrashTypeX on TrashType {
-  String get label => name
-      .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m[1]} ${m[2]}')
-      .replaceFirst(name[0], name[0].toUpperCase());
+  String get label => switch (this) {
+    TrashType.foodScrap => 'Sisa Makanan',
+    TrashType.leaf => 'Daun',
+    TrashType.bottle => 'Botol',
+    TrashType.can => 'Kaleng',
+    TrashType.glass => 'Kaca',
+    TrashType.diaper => 'Popok',
+    TrashType.sanitaryPad => 'Pembalut',
+    TrashType.battery => 'Baterai',
+    TrashType.lightBulb => 'Bohlam',
+    TrashType.cardboard => 'Kardus',
+    TrashType.officePaper => 'Kertas Kantor',
+    TrashType.plasticBag => 'Kantong Plastik', // Added
+    TrashType.electronic => 'Elektronik',     // Added
+    TrashType.metal => 'Logam',               // Added
+    TrashType.textile => 'Tekstil',           // Added
+    TrashType.wood => 'Kayu',                 // Added
+    TrashType.rubber => 'Karet',              // Added
+    TrashType.other => 'Lain-lain',           // Added
+  };
+
+  TrashCategory get category {
+    switch (this) {
+      case TrashType.foodScrap:
+      case TrashType.leaf:
+        return TrashCategory.organic;
+      case TrashType.bottle:
+      case TrashType.can:
+      case TrashType.glass:
+      case TrashType.plasticBag: // Added
+      case TrashType.electronic: // Added
+      case TrashType.metal:      // Added
+      case TrashType.textile:    // Added
+      case TrashType.wood:       // Added
+      case TrashType.rubber:     // Added
+        return TrashCategory.inorganic;
+      case TrashType.diaper:
+      case TrashType.sanitaryPad:
+      case TrashType.other:      // Added
+        return TrashCategory.residual;
+      case TrashType.battery:
+      case TrashType.lightBulb:
+        return TrashCategory.hazardous;
+      case TrashType.cardboard:
+      case TrashType.officePaper:
+        return TrashCategory.paper;
+    }
+  }
 }
