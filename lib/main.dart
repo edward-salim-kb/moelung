@@ -31,6 +31,8 @@ import 'package:moelung_new/utils/app_colors.dart'; // Import AppColors for high
 
 import 'package:moelung_new/services/pickup_service.dart'; // Import PickupService
 import 'package:moelung_new/models/enums/service_type.dart'; // Import ServiceType
+import 'package:moelung_new/screens/onboarding/splash_screen.dart'; // Import SplashScreen
+import 'package:moelung_new/screens/onboarding/intro_screen.dart'; // Import IntroScreen
 
 void main() {
   runApp(
@@ -95,7 +97,7 @@ class MyApp extends StatelessWidget {
           title: 'Moelung New',
           debugShowCheckedModeBanner: false, // Remove debug banner
           theme: accessibilityProvider.highContrastMode ? highContrastTheme : baseTheme,
-          initialRoute: AppRoutes.login, // Set initial route to login
+          initialRoute: AppRoutes.splash, // Set initial route to splash
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
@@ -123,6 +125,12 @@ class MyApp extends StatelessWidget {
             Widget screen;
 
             switch (settings.name) {
+              case AppRoutes.splash:
+                screen = const SplashScreen();
+                break;
+              case AppRoutes.intro:
+                screen = const IntroScreen();
+                break;
               case AppRoutes.login:
                 screen = const LoginScreen();
                 break;

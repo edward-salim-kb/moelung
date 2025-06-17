@@ -101,7 +101,7 @@ class KumpoelDrawer extends StatelessWidget {
                       ],
                     ),
                   ),
-                )).toList(),
+                )),
                 const SizedBox(height: 8),
                 Text(
                   'Pinjam Motor Moelung: ${isMotorcycleBorrowed ? 'Ya' : 'Tidak'}',

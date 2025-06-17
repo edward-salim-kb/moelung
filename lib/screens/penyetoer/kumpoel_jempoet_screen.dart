@@ -49,7 +49,7 @@ class _KumpoelJempoetScreenState extends State<KumpoelJempoetScreen> {
   double _totalCollectedTrashWeight = 0.0; // Total trash collected by the user
   List<LatLng> _userRoutePoints = []; // Simulated route of the user
   List<HistoricalRoute> _otherPeopleRoutes = []; // Other people's historical routes
-  List<EquipmentItem> _equipmentList = [
+  final List<EquipmentItem> _equipmentList = [
     EquipmentItem(name: 'Masker', icon: Icons.masks),
     EquipmentItem(name: 'Sarung Tangan', icon: Icons.handshake),
     EquipmentItem(name: 'Karung Sampah', icon: Icons.recycling),
@@ -58,7 +58,7 @@ class _KumpoelJempoetScreenState extends State<KumpoelJempoetScreen> {
     EquipmentItem(name: 'Sepatu Bot', icon: Icons.hiking),
     EquipmentItem(name: 'Asuransi Kesehatan', icon: Icons.health_and_safety),
   ]; // Dummy equipment list with icons
-  bool _isMotorcycleBorrowed = false; // Dummy motorcycle borrowing status
+  final bool _isMotorcycleBorrowed = false; // Dummy motorcycle borrowing status
   DateTime? _kumpoelStartTime; // New: To track when Kumpoel started
   String _elapsedTime = '00:00:00'; // New: Formatted elapsed time
   Timer? _kumpoelTimer; // New: Timer for Kumpoel duration
@@ -510,7 +510,7 @@ class _KumpoelJempoetScreenState extends State<KumpoelJempoetScreen> {
                           onChanged: (value) => updatePrice(), // Update price on change
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -524,7 +524,7 @@ class _KumpoelJempoetScreenState extends State<KumpoelJempoetScreen> {
                     });
 
                     Navigator.of(context).pop(); // Dismiss dialog first
-                    if (this.mounted) { // Check if widget is still mounted after dialog is popped
+                    if (mounted) { // Check if widget is still mounted after dialog is popped
                       this.setState(() { // Use outer setState for screen update
                         _totalCollectedTrashWeight += totalLoggedWeight;
                         // No specific tikoem to update here, as it's a general log

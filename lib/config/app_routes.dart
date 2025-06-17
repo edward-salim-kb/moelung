@@ -19,4 +19,6 @@ class AppRoutes {
   static const String accessibilitySettings = '/accessibilitySettings'; // New route for Accessibility Settings Screen
   static const String termsOfService = '/termsOfService'; // New route for Terms of Service Screen
   static const String privacyPolicy = '/privacyPolicy'; // New route for Privacy Policy Screen
+  static const String splash = '/splash'; // New route for Splash Screen
+  static const String intro = '/intro'; // New route for Intro Screen
 }

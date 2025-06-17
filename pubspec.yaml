@@ -39,3 +39,4 @@ flutter:
     - lib/assets/point-items/
     - lib/assets/articles/
     - lib/assets/avatars/
+    - lib/assets/intro/
